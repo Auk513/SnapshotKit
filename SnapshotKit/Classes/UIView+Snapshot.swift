@@ -7,7 +7,29 @@
 
 import UIKit
 
+private var SnapshotKit_IsShoting: String = "SnapshotKit_AssoKey_isShoting"
+
 extension UIView: SnapshotKitProtocol {
+    
+    var isShoting:Bool! {
+        get {
+            let num = objc_getAssociatedObject(self, &SnapshotKit_IsShoting)
+            if num == nil {
+                return false
+            }
+            
+            if let numObj = num as? NSNumber {
+                return numObj.boolValue
+            }else {
+                return false
+            }
+        }
+        set(newValue) {
+            let num = NSNumber(value: newValue as Bool)
+            objc_setAssociatedObject(self, &SnapshotKit_IsShoting, num, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
     @objc
     public func takeSnapshotOfVisibleContent() -> UIImage? {
         return self.takeSnapshotOfFullContent(for: self.bounds)
