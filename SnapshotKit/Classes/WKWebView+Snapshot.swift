@@ -8,18 +8,7 @@
 import UIKit
 import WebKit
 
-private var SnapshotKit_ProgressBlock: String = "SnapshotKit_ProgressBlock"
-
 extension WKWebView {
-    
-    var progressBlock: ((Int, Int) -> Void)? {
-        get {
-            return objc_getAssociatedObject(self, &SnapshotKit_ProgressBlock) as? ((Int, Int) -> Void)
-        }
-        set(newValue) {
-            objc_setAssociatedObject(self, &SnapshotKit_ProgressBlock, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-    }
     
     override
     public func takeSnapshotOfVisibleContent() -> UIImage? {

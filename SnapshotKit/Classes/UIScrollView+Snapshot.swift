@@ -85,10 +85,55 @@ extension UIScrollView {
             self.drawHierarchy(in: pageFrame, afterScreenUpdates: true)
 
             if index < maxIndex {
+                self.progressBlock?(index+1, maxIndex)
                 self.drawScreenshotOfPageContent(index + 1, maxIndex: maxIndex, completion: completion)
             }else{
                 completion()
             }
         }
+    }
+    
+    public func asyncTakeSnapshotOfFullContent(progress: @escaping ((Int, Int) -> Void), _ completion: @escaping ((UIImage?) -> Void)) {
+        self.isShoting = true
+        self.progressBlock = progress
+        // Put a fake Cover of View
+        let snapShotView = self.snapshotView(afterScreenUpdates: true)
+        snapShotView?.frame = CGRect(x: self.frame.origin.x, y: self.frame.origin.y, width: (snapShotView?.frame.size.width)!, height: (snapShotView?.frame.size.height)!)
+        self.superview?.addSubview(snapShotView!)
+        let shadowView = UIView()
+        shadowView.frame = snapShotView?.bounds ?? .zero
+        shadowView.backgroundColor = .init(white: 1, alpha: 0.3)
+        snapShotView?.addSubview(shadowView)
+        
+        let originalOffset = self.contentOffset
+
+        // 当contentSize.height<bounds.height时，保证至少有1页的内容绘制
+        var pageNum = 1
+        if self.contentSize.height > self.bounds.height {
+            pageNum = Int(floorf(Float(self.contentSize.height / self.bounds.height)))
+        }
+        
+        let backgroundColor = self.backgroundColor ?? UIColor.white
+
+        UIGraphicsBeginImageContextWithOptions(self.contentSize, true, 0)
+
+        guard let context = UIGraphicsGetCurrentContext() else {
+            completion(nil)
+            return
+        }
+        context.setFillColor(backgroundColor.cgColor)
+        context.setStrokeColor(backgroundColor.cgColor)
+        
+        self.drawScreenshotOfPageContent(0, maxIndex: pageNum) {
+            let image = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            self.contentOffset = originalOffset
+            
+            shadowView.removeFromSuperview()
+            snapShotView?.removeFromSuperview()
+            self.isShoting = false
+            completion(image)
+        }
+        
     }
 }

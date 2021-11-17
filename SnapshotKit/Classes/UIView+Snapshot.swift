@@ -9,6 +9,8 @@ import UIKit
 
 private var SnapshotKit_IsShoting: String = "SnapshotKit_AssoKey_isShoting"
 
+private var SnapshotKit_ProgressBlock: String = "SnapshotKit_ProgressBlock"
+
 extension UIView: SnapshotKitProtocol {
     
     var isShoting:Bool! {
@@ -27,6 +29,15 @@ extension UIView: SnapshotKitProtocol {
         set(newValue) {
             let num = NSNumber(value: newValue as Bool)
             objc_setAssociatedObject(self, &SnapshotKit_IsShoting, num, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    var progressBlock: ((Int, Int) -> Void)? {
+        get {
+            return objc_getAssociatedObject(self, &SnapshotKit_ProgressBlock) as? ((Int, Int) -> Void)
+        }
+        set(newValue) {
+            objc_setAssociatedObject(self, &SnapshotKit_ProgressBlock, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     
